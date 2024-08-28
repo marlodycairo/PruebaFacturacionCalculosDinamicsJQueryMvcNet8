@@ -1,0 +1,39 @@
+﻿@model PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Models.FacturaViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Invoice Details</h2>
+
+<div>
+    <h4>Invoice Number: @Model</h4>
+    <h4>Date: @Model.FechaEmision.ToString("yyyy-MM-dd")</h4>
+    <h4>Customer: @Model.Cliente</h4>
+</div>
+
+<h4>Items</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrdenProductos)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Cantidad</td>
+                <td>@item.PrecioUnitario.ToString("F2")</td>
+                <td>@item.Subtotal.ToString("F2")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4>Total: @Model.Total.ToString("F2")</h4>
+<a asp-action="Index" class="btn btn-primary">Back to List</a>

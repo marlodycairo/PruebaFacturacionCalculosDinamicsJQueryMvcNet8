@@ -1,0 +1,31 @@
+﻿@model IEnumerable<PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Models.FacturaViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Facturas</h2>
+
+<a class="btn btn-outline-info" asp-action="Create" asp-controller="Factura">Crer factura</a>
+
+<table class="table table-bordered table-hover border-info">
+    <thead>
+        <tr>
+            <th>Factura No.</th>
+            <th>Fecha Emisión</th>
+            <th>Cliente</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    @foreach (var item in Model)
+    {
+        <tbody>
+            <tr>
+                <td>@item.FacturaNumero</td>
+                <td>@item.FechaEmision</td>
+                <td>@item.Cliente</td>
+                <td>@item.Total</td>
+            </tr>
+        </tbody>
+    }
+</table>

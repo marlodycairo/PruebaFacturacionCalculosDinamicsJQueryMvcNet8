@@ -1,0 +1,210 @@
+﻿@model PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Models.FacturaViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h3>Crear Factura</h3>
+
+<form class="form" id="formFactura">
+    <div>
+        <label>
+            Fecha Emisión
+            <input type="date" id="FechaEmision" name="FechaEmision" value="@Model.FechaEmision.ToString("yyyy-MM-dd")" />
+        </label>
+    </div>
+    <div>
+        <label>
+            Cliente
+            @Html.DropDownListFor(model => model.ClienteId, Model.Clientes, "Seleccione un Cliente", new { @class = "", id = "ClienteId" })
+        </label>
+    </div>
+    <div>
+        <label>
+            Producto
+            @Html.DropDownList("ProductoId", Model.ProductosDisponibles, "Seleccione un Producto", new { @class = "", id = "selectProducto" })
+        </label>
+        <button type="button" id="addProducto" class="btn btn-sm btn-outline-primary">Agregar producto</button>
+    </div>
+    <div>
+        <table id="tablaProductos">
+            <thead>
+                <tr>
+                    <th>Nombre Producto</th>
+                    <th>Precio Unitario</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Las filas de productos se agregarán aquí -->
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <label>
+            Total
+            <input type="number" id="totalFactura" name="Total" readonly value="0.00" />
+        </label>
+    </div>
+    <button type="button" id="guardarFactura" class="btn btn-outline-success">Guardar</button>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            function calcularSubtotal(precio, cantidad) {
+                return (precio * cantidad).toFixed(2);
+            }
+
+            function actualizarTotal() {
+                let total = 0;
+                $('#tablaProductos tbody tr').each(function () {
+                    let subtotal = parseFloat($(this).find('.subtotal').val());
+                    if (!isNaN(subtotal)) {
+                        total += subtotal;
+                    }
+                });
+                $('#totalFactura').val(total.toFixed(2));
+            }
+
+            $('#addProducto').click(function () {
+                const productoId = $('#selectProducto').val();
+
+                fetch(`/Factura/GetProductById?id=${productoId}`)
+                    .then(response => {
+                        console.log('Response: ', response);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json(); // Convertir a JSON
+                    })
+                    .then(data => {
+                        console.log('data', data); // Revisa la estructura del JSON en la consola
+                        if (data.success) {
+                            const producto = data.product;
+                            const cantidad = 1; // Cantidad inicial por defecto
+                            const subtotal = calcularSubtotal(producto.unitPrice, cantidad);
+
+                            const nuevaFila = `
+                                        <tr data-producto-id="${producto.id}">
+                                            <td>${producto.name}</td>
+                                            <td><input type="number" name="UnitPrice" class="precioUnitario form-control" step="0.01" value="${producto.unitPrice}" /></td>
+                                            <td><input type="number" name="Cantidad" class="cantidad form-control" value="${cantidad}" /></td>
+                                            <td><input type="number" name="Subtotal" class="subtotal form-control" readonly value="${subtotal}" /></td>
+                                            <td><button type="button" class="eliminarProducto btn btn-sm btn-outline-danger">Eliminar</button></td>
+                                        </tr>`;
+
+                            $('#tablaProductos tbody').append(nuevaFila);
+                            actualizarTotal();
+                        } else {
+                            alert("Producto no encontrado.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching product details:', error);
+                        alert('Error al obtener detalles del producto.');
+                    });
+            });
+
+            $(document).on('input', '.precioUnitario, .cantidad', function () {
+                const fila = $(this).closest('tr');
+                const precioUnitario = parseFloat(fila.find('.precioUnitario').val()) || 0;
+                const cantidad = parseFloat(fila.find('.cantidad').val()) || 0;
+                const subtotal = calcularSubtotal(precioUnitario, cantidad);
+                fila.find('.subtotal').val(subtotal);
+                actualizarTotal();
+            });
+
+            $(document).on('click', '.eliminarProducto', function () {
+                $(this).closest('tr').remove();
+                actualizarTotal();
+            });
+
+            // Guardar la factura usando fetch
+            $('#guardarFactura').click(function () {
+                const factura = {
+                    FechaEmision: $('#FechaEmision').val(),
+                    ClienteId: $('#ClienteId').val(),
+                    Productos: []
+                };
+
+                var productId = $('#data-producto-id').val();
+
+                console.log('Id', productId);
+
+                $('#tablaProductos tbody tr').each(function () {
+                    const producto = {
+
+                        Name: $(this).find('td').first().text().trim(),
+                        UnitPrice: parseFloat($(this).find('input[name="UnitPrice"]').val()),
+                        Cantidad: parseInt($(this).find('input[name="Cantidad"]').val()),
+                    };
+                    factura.Productos.push(producto);
+                });
+
+                console.log(JSON.stringify(factura))
+                fetch('@Url.Action("Create", "Factura")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(factura)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            window.location.href = '@Url.Action("Index", "Factura")'; // Redirige después de guardar
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving invoice:', error);
+                        alert('Error al guardar la factura.');
+                    });
+            });
+        });
+    </script>
+}
+
+
+@*
+    css-html - dalto
+    Prueba 2 (2 Horas): Facturación con Cálculos Dinámicos
+Objetivo
+Desarrollar una aplicación que permita la creación, visualización y cálculo dinámico de facturas, utilizando ASP.NET MVC, jQuery y JavaScript.
+
+Requisitos Funcionales
+Crear Factura:
+
+Crear una factura con los siguientes campos:
+Número de Factura (string, único, generado automáticamente)
+Fecha de Emisión (DateTime, requerido)
+Cliente (string, requerido)
+Añadir múltiples productos/servicios:
+Descripción (string, requerido)
+Cantidad (int, requerido)
+Precio Unitario (decimal, requerido)
+Subtotal (calculado automáticamente como Cantidad * Precio Unitario).
+Total de la factura (suma de subtotales).
+Cálculos Dinámicos:
+
+Implementar el cálculo dinámico de los subtotales y el total de la factura utilizando jQuery y JavaScript.
+Al cambiar la cantidad o el precio, actualizar automáticamente los subtotales y el total sin recargar la página.
+Visualización de Facturas:
+
+Mostrar una lista de todas las facturas creadas, con la capacidad de ver detalles individuales.
+Validación:
+
+Validación de los campos obligatorios tanto en el cliente como en el servidor.
+Manejo de errores en caso de datos inválidos.
+Criterios de Evaluación
+Implementación correcta de CRUD con ASP.NET MVC.
+Uso de jQuery para cálculos dinámicos y manejo de eventos.
+Validación efectiva y manejo de errores.
+Estimación de Tiempo: 2 horas
+ *@
