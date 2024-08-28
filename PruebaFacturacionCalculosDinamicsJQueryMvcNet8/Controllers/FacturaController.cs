@@ -38,6 +38,11 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] Factura factura)
         {
+            if (factura == null || factura.OrdenProductos == null || !factura.OrdenProductos.Any())
+            {
+                return Json(new { success = false, message = "La factura o los productos no son válidos." });
+            }
+
             _facturaService.CreateFactura(factura);
 
             return Json(new { success = true, message = "Factura guardada con éxito" });

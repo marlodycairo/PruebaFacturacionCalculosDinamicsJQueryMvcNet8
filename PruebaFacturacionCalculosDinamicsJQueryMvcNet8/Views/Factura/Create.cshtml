@@ -74,28 +74,21 @@
                 const productoId = $('#selectProducto').val();
 
                 fetch(`/Factura/GetProductById?id=${productoId}`)
-                    .then(response => {
-                        console.log('Response: ', response);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
-                        return response.json(); // Convertir a JSON
-                    })
+                    .then(response => response.json())
                     .then(data => {
-                        console.log('data', data); // Revisa la estructura del JSON en la consola
                         if (data.success) {
                             const producto = data.product;
                             const cantidad = 1; // Cantidad inicial por defecto
                             const subtotal = calcularSubtotal(producto.unitPrice, cantidad);
 
                             const nuevaFila = `
-                                        <tr data-producto-id="${producto.id}">
-                                            <td>${producto.name}</td>
-                                            <td><input type="number" name="UnitPrice" class="precioUnitario form-control" step="0.01" value="${producto.unitPrice}" /></td>
-                                            <td><input type="number" name="Cantidad" class="cantidad form-control" value="${cantidad}" /></td>
-                                            <td><input type="number" name="Subtotal" class="subtotal form-control" readonly value="${subtotal}" /></td>
-                                            <td><button type="button" class="eliminarProducto btn btn-sm btn-outline-danger">Eliminar</button></td>
-                                        </tr>`;
+                                <tr data-producto-id="${producto.id}">
+                                    <td>${producto.name}</td>
+                                    <td><input type="number" name="UnitPrice" class="precioUnitario form-control" step="0.01" value="${producto.unitPrice}" /></td>
+                                    <td><input type="number" name="Cantidad" class="cantidad form-control" value="${cantidad}" /></td>
+                                    <td><input type="number" name="Subtotal" class="subtotal form-control" readonly value="${subtotal}" /></td>
+                                    <td><button type="button" class="eliminarProducto btn btn-sm btn-outline-danger">Eliminar</button></td>
+                                </tr>`;
 
                             $('#tablaProductos tbody').append(nuevaFila);
                             actualizarTotal();
@@ -128,24 +121,20 @@
                 const factura = {
                     FechaEmision: $('#FechaEmision').val(),
                     ClienteId: $('#ClienteId').val(),
-                    Productos: []
+                    Total: parseFloat($('#totalFactura').val()),
+                    OrdenProductos: []
                 };
 
-                var productId = $('#data-producto-id').val();
-
-                console.log('Id', productId);
-
                 $('#tablaProductos tbody tr').each(function () {
-                    const producto = {
-
-                        Name: $(this).find('td').first().text().trim(),
-                        UnitPrice: parseFloat($(this).find('input[name="UnitPrice"]').val()),
+                    const ordenProducto = {
+                        ProductId: $(this).data('producto-id'),
+                        PrecioUnitario: parseFloat($(this).find('input[name="UnitPrice"]').val()),
                         Cantidad: parseInt($(this).find('input[name="Cantidad"]').val()),
+                        Subtotal: parseFloat($(this).find('input[name="Subtotal"]').val())
                     };
-                    factura.Productos.push(producto);
+                    factura.OrdenProductos.push(ordenProducto);
                 });
 
-                console.log(JSON.stringify(factura))
                 fetch('@Url.Action("Create", "Factura")', {
                     method: 'POST',
                     headers: {

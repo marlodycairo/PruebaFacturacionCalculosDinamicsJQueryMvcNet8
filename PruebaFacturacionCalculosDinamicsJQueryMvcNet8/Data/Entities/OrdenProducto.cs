@@ -5,22 +5,13 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Data.Entities
 {
     public class OrdenProducto
     {
-        private decimal _subtotal;
-
         [Key]
         public int Id { get; set; }
         public int ProductId { get; set; }
         public int Cantidad { get; set; }
         public decimal PrecioUnitario { get; set; }
         public int FacturaId { get; set; }
-        public decimal Subtotal
-        {
-            get { return Cantidad * PrecioUnitario; }
-            set
-            {
-                _subtotal = value;
-            }
-        }
+        public decimal Subtotal { get; set; }
 
         [ForeignKey("FacturaId")]
         public Factura Factura { get; set; }

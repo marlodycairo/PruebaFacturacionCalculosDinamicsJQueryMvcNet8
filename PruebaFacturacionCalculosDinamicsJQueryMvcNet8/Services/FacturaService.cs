@@ -15,7 +15,6 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Services
         {
             var crearFactura = new Factura
             {
-                Id = factura.Id,
                 FacturaNumero = Guid.NewGuid().ToString().ToUpper(),
                 FechaEmision = factura.FechaEmision,
                 ClienteId = factura.ClienteId,
@@ -23,21 +22,19 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Services
             };
 
             _context.Facturas.Add(crearFactura);
-
-            _context.SaveChanges();
+            _context.SaveChanges(); // Guardar la factura primero para generar el ID
 
             foreach (var item in factura.OrdenProductos)
             {
                 var orden = new OrdenProducto
                 {
-                    Id = item.Id,
-                    FacturaId = item.FacturaId,
+                    FacturaId = crearFactura.Id,
                     ProductId = item.ProductId,
                     PrecioUnitario = item.PrecioUnitario,
                     Cantidad = item.Cantidad,
                     Subtotal = item.Subtotal
                 };
-                
+
                 _context.OrdenProductos.Add(orden);
             }
 
