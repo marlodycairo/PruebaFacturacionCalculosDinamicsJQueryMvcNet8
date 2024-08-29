@@ -6,36 +6,53 @@ using PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Models;
 
 namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
 {
-    public class FacturaController(IClienteService clienteService, IFacturaService facturaService,
-        IOrdenProductService ordenProductService, IProductoService productoService) : Controller
+    public class FacturaController : Controller
     {
-        private readonly IClienteService _clienteService = clienteService;
-        private readonly IFacturaService _facturaService = facturaService;
-        private readonly IOrdenProductService _ordenProductService = ordenProductService;
-        private readonly IProductoService _productoService = productoService;
+        private readonly IClienteService _clienteService;
+        private readonly IFacturaService _facturaService;
+        private readonly IOrdenProductService _ordenProductService;
+        private readonly IProductoService _productoService;
 
-        // GET: Factura
-        public async Task<IActionResult> Index()
+        public FacturaController(IClienteService clienteService, IFacturaService facturaService,
+            IOrdenProductService ordenProductService, IProductoService productoService)
         {
-            return View( await _facturaService.GetFacturasAsync());
+            _clienteService = clienteService;
+            _facturaService = facturaService;
+            _ordenProductService = ordenProductService;
+            _productoService = productoService;
         }
 
+
+        // GET: Factura
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> Index()
+        {
+            return View(await _facturaService.GetFacturasAsync());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<IActionResult> Create()
         {
             var factura = new FacturaViewModel
             {
                 FechaEmision = DateTime.UtcNow,
-                ProductosDisponibles = (await  _productoService.GetProductsAsync())
+                ProductosDisponibles = (await _productoService.GetProductsAsync())
                     .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name }).ToList(),
-                Clientes = ( await _clienteService.GetClientesAsync())
-                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = $"{c.Firstname} {c.Lastname}"}).ToList()
+                Clientes = (await _clienteService.GetClientesAsync())
+                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = $"{c.Firstname} {c.Lastname}" }).ToList()
             };
 
             return View(factura);
         }
 
         [HttpPost]
-        public async  Task<IActionResult> Create([FromBody] Factura factura)
+        public async Task<IActionResult> Create([FromBody] Factura factura)
         {
             if (factura is null || factura.OrdenProductos is null || factura.OrdenProductos.Count == 0)
             {
