@@ -6,7 +6,7 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.IServices
     public interface IFacturaService
     {
         List<FacturaViewModel> GetFacturas();
-        //List<FacturaViewModel> GetAllFacturas();
+        List<FacturaViewModel> GetAllFacturas();
         void CreateFactura(Factura factura);
         //FacturaViewModel GetFacturaById(string facturaId);
         void DeleteFactura(string facturaId);

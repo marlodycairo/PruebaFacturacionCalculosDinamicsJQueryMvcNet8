@@ -17,7 +17,7 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
         // GET: Factura
         public IActionResult Index()
         {
-            return View(_facturaService.GetFacturas());
+            return View(_facturaService.GetAllFacturas());
         }
 
         public IActionResult Create()

@@ -50,45 +50,38 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Services
             _context.SaveChanges();
         }
 
-        //public List<FacturaViewModel> GetAllFacturas()
+        public List<FacturaViewModel> GetAllFacturas()
+        {
+            var facturas = _context.Facturas.Include(c => c.Cliente).ToList();
+
+            var facturasViewModel = facturas.Select(factura => new FacturaViewModel
+            {
+                Id = factura.Id,
+                FacturaNumero = factura.FacturaNumero,
+                FechaEmision = factura.FechaEmision,
+                ClienteId = factura.ClienteId,
+                Cliente = new ClienteViewModel
+                {
+                    Id = factura.Cliente.Id,
+                    Firstname = factura.Cliente.Firstname,
+                    Lastname = factura.Cliente.Lastname,
+                    Email = factura.Cliente.Email
+                },
+                Total = factura.Total
+            }).ToList();
+
+            return facturasViewModel;
+        }
+
+        //public FacturaViewModel GetFacturaById(string numeroFactura)
         //{
-        //    var facturas = _context.Facturas.Include(x => x.Cliente).ToList();
-        //        .Select(f => new FacturaViewModel
-        //        {
-        //            Id = f.Id,
-        //            FacturaNumero = f.FacturaNumero,
-        //            FechaEmision = f.FechaEmision,
-        //            ClienteId = f.ClienteId,
-        //            Cliente = _context.Clientes
-        //            .Select(c => new ClienteViewModel
-        //            {
-        //                Id = c.Id,
-        //                Firstname = c.Firstname,
-        //                Lastname = c.Lastname,
-        //                Email = c.Email
-        //            })
-        //        })
-        //}
+        //    var factura = _context.Facturas.Where(x => x.FacturaNumero == numeroFactura).FirstOrDefault();
 
-        //public FacturaViewModel GetFacturaById(string facturaId)
-        //{
-        //    var factura = _context.Facturas.Where(x => x.FacturaNumero == x.FacturaNumero)
-        //        .Select(factura => new FacturaViewModel 
-        //        { 
-        //            Id = factura.Id,
-        //            FacturaNumero = factura.FacturaNumero,
-        //            FechaEmision = factura.FechaEmision,
-        //            ClienteId = factura.ClienteId,
-        //            OrdenProductos = _context.OrdenProductos.Where(x => x.FacturaId == factura.Id)
-        //                .Select(orden => new OrdenProducto
-        //                {
-        //                    Id = orden.Id,
-        //                    FacturaId = orden.FacturaId,
-        //                    i
-        //                })
-        //        })
+        //    var factura = new FacturaViewModel
+        //    {
+        //        Id = factura.Id,
 
-
+        //    }
         //}
 
         public List<FacturaViewModel> GetFacturas()
