@@ -16,7 +16,7 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Models
         [Required(ErrorMessage = "El nombre del cliente es obligatorio")]
         public int ClienteId { get; set; }
         public List<OrdenProductoViewModel> OrdenProductos { get; set; }
-        public decimal Total => OrdenProductos?.Sum(x => x.Subtotal) ?? 0;
+        public decimal Total { get; set; }
 
         public ClienteViewModel Cliente { get; set; }
 
