@@ -51,6 +51,12 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
             return View(factura);
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="factura"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Factura factura)
         {
@@ -64,12 +70,18 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
             return Json(new { success = true, message = "Factura guardada con éxito" });
         }
 
-        [HttpGet]
-        public JsonResult GetProductById(int id)
-        {
-            var product = _productoService.GetProductByIdAsync(id);
 
-            if (product == null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async  Task<JsonResult> GetProductById(int id)
+        {
+            var product = await _productoService.GetProductByIdAsync(id);
+
+            if (product is null)
             {
                 return Json(new { success = false, message = "Producto no encontrado." });
             }
