@@ -1,4 +1,5 @@
-﻿using PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Data.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Data.Context;
 using PruebaFacturacionCalculosDinamicsJQueryMvcNet8.IServices;
 using PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Models;
 
@@ -8,21 +9,34 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Services
     {
         private readonly ApplicationDbContext _context = context;
 
-        public ProductViewModel GetProductById(int id)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async  Task<ProductViewModel> GetProductByIdAsync(int id)
         {
-            return _context.Productos
-                .Where(p => p.Id == id)
-                .Select(p => new ProductViewModel 
-                { 
-                    Id = p.Id, Name = p.Name, UnitPrice = p.UnitPrice
-                }).FirstOrDefault();
+            return await _context.Productos
+                    .Where(p => p.Id == id)
+                    .Select(p => new ProductViewModel 
+                    { 
+                        Id = p.Id, Name = p.Name, UnitPrice = p.UnitPrice
+                    }).FirstOrDefaultAsync();
         }
 
-        public List<ProductViewModel> GetProducts()
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<ProductViewModel>> GetProductsAsync()
         {
-            return [.. _context.Productos
-                .Select(producto => new ProductViewModel 
-                    { Id = producto.Id, Name = producto.Name, UnitPrice = producto.UnitPrice})];
+            return await _context.Productos
+                  .Select(producto => new ProductViewModel
+                                { Id = producto.Id,
+                                Name = producto.Name,
+                                UnitPrice = producto.UnitPrice })
+                  .ToListAsync();
         }
     }
 }

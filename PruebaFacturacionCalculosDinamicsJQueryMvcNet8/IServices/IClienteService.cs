@@ -5,6 +5,6 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.IServices
 {
     public interface IClienteService
     {
-        List<ClienteViewModel> GetClientes();
+        Task<IList<ClienteViewModel>> GetClientesAsync();
     }
 }

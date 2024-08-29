@@ -15,20 +15,19 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
         private readonly IProductoService _productoService = productoService;
 
         // GET: Factura
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_facturaService.GetFacturas());
+            return View( await _facturaService.GetFacturasAsync());
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var factura = new FacturaViewModel
             {
-                //FacturaNumero = Guid.NewGuid().ToString(),
                 FechaEmision = DateTime.UtcNow,
-                ProductosDisponibles = _productoService.GetProducts()
+                ProductosDisponibles = (await  _productoService.GetProductsAsync())
                     .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name }).ToList(),
-                Clientes = _clienteService.GetClientes()
+                Clientes = ( await _clienteService.GetClientesAsync())
                     .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = $"{c.Firstname} {c.Lastname}"}).ToList()
             };
 
@@ -36,14 +35,14 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] Factura factura)
+        public async  Task<IActionResult> Create([FromBody] Factura factura)
         {
-            if (factura == null || factura.OrdenProductos == null || !factura.OrdenProductos.Any())
+            if (factura is null || factura.OrdenProductos is null || factura.OrdenProductos.Count == 0)
             {
                 return Json(new { success = false, message = "La factura o los productos no son válidos." });
             }
 
-            _facturaService.CreateFactura(factura);
+            await _facturaService.CreateFacturaAsync(factura);
 
             return Json(new { success = true, message = "Factura guardada con éxito" });
         }
@@ -51,7 +50,7 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
         [HttpGet]
         public JsonResult GetProductById(int id)
         {
-            var product = _productoService.GetProductById(id);
+            var product = _productoService.GetProductByIdAsync(id);
 
             if (product == null)
             {

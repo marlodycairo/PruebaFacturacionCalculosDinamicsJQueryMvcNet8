@@ -15,7 +15,7 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
         [HttpGet]
         public JsonResult GetProductById(int id)
         {
-            var product = _productService.GetProductById(id);
+            var product = _productService.GetProductByIdAsync(id);
 
             return Json(product);
         }

@@ -4,7 +4,7 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.IServices
 {
     public interface IProductoService
     {
-        List<ProductViewModel> GetProducts();
-        ProductViewModel GetProductById(int id);
+        Task<List<ProductViewModel>> GetProductsAsync();
+        Task<ProductViewModel> GetProductByIdAsync(int id);
     }
 }
