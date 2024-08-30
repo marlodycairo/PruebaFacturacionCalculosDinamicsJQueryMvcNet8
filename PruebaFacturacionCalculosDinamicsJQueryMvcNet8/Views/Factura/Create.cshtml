@@ -70,8 +70,20 @@
                 $('#totalFactura').val(total.toFixed(2));
             }
 
+            // Validar que solo se pueda seleccionar un cliente una vez
+            $('#ClienteId').change(function () {
+                $(this).prop('disabled', true);
+                alert('Cliente seleccionado. No puede cambiar de cliente.');
+            });
+
             $('#addProducto').click(function () {
                 const productoId = $('#selectProducto').val();
+
+                // Validar que el producto no haya sido agregado ya
+                if ($('#tablaProductos tbody tr[data-producto-id="' + productoId + '"]').length > 0) {
+                    alert("El producto ya existe en el listado. Ingrese un producto diferente.");
+                    return;
+                }
 
                 fetch(`/Factura/GetProductById?id=${productoId}`)
                     .then(response => response.json())
@@ -82,13 +94,13 @@
                             const subtotal = calcularSubtotal(producto.unitPrice, cantidad);
 
                             const nuevaFila = `
-                                <tr data-producto-id="${producto.id}">
-                                    <td>${producto.name}</td>
-                                    <td><input type="number" name="UnitPrice" class="precioUnitario form-control" step="0.01" value="${producto.unitPrice}" /></td>
-                                    <td><input type="number" name="Cantidad" class="cantidad form-control" value="${cantidad}" /></td>
-                                    <td><input type="number" name="Subtotal" class="subtotal form-control" readonly value="${subtotal}" /></td>
-                                    <td><button type="button" class="eliminarProducto btn btn-sm btn-outline-danger">Eliminar</button></td>
-                                </tr>`;
+                                        <tr data-producto-id="${producto.id}">
+                                            <td>${producto.name}</td>
+                                            <td><input type="number" name="UnitPrice" class="precioUnitario form-control" step="0.01" value="${producto.unitPrice}" readonly /></td>
+                                            <td><input type="number" name="Cantidad" class="cantidad form-control" value="${cantidad}" min="1" max="100" /></td>
+                                            <td><input type="number" name="Subtotal" class="subtotal form-control" readonly value="${subtotal}" /></td>
+                                            <td><button type="button" class="eliminarProducto btn btn-sm btn-outline-danger">Eliminar</button></td>
+                                        </tr>`;
 
                             $('#tablaProductos tbody').append(nuevaFila);
                             actualizarTotal();
@@ -106,6 +118,14 @@
                 const fila = $(this).closest('tr');
                 const precioUnitario = parseFloat(fila.find('.precioUnitario').val()) || 0;
                 const cantidad = parseFloat(fila.find('.cantidad').val()) || 0;
+
+                // Validar cantidad
+                if (cantidad < 1 || cantidad > 100) {
+                    alert('La cantidad debe estar entre 1 y 100.');
+                    fila.find('.cantidad').val(1); // Restablece a 1 si no está en el rango
+                    return;
+                }
+
                 const subtotal = calcularSubtotal(precioUnitario, cantidad);
                 fila.find('.subtotal').val(subtotal);
                 actualizarTotal();

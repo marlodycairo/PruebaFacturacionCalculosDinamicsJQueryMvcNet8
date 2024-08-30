@@ -109,35 +109,34 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Services
         public async Task<bool> UpdateFacturaAsync(Factura factura)
         {
             var facturaExistente = await _context.Facturas
-                .Include(f => f.OrdenProductos)
-                .FirstOrDefaultAsync(f => f.Id == factura.Id);
+        .Include(f => f.OrdenProductos)
+        .FirstOrDefaultAsync(f => f.Id == factura.Id);
 
-            if (facturaExistente is null)
+            if (facturaExistente == null)
             {
                 return false;
             }
 
+            // Actualizar las propiedades de la factura
             facturaExistente.FechaEmision = factura.FechaEmision;
-            facturaExistente.ClienteId = factura.ClienteId;
             facturaExistente.Total = factura.Total;
 
-            // Aquí puedes manejar la actualización de productos, agregar o eliminar según sea necesario
+            // Eliminar productos actuales y agregar los nuevos
             _context.OrdenProductos.RemoveRange(facturaExistente.OrdenProductos);
-            facturaExistente.OrdenProductos.Clear();
 
-            foreach (var orden in factura.OrdenProductos)
+            foreach (var producto in factura.OrdenProductos)
             {
                 facturaExistente.OrdenProductos.Add(new OrdenProducto
                 {
-                    FacturaId = facturaExistente.Id,
-                    ProductId = orden.ProductId,
-                    PrecioUnitario = orden.PrecioUnitario,
-                    Cantidad = orden.Cantidad,
-                    Subtotal = orden.Subtotal
+                    ProductId = producto.ProductId,
+                    Cantidad = producto.Cantidad,
+                    PrecioUnitario = producto.PrecioUnitario,
+                    Subtotal = producto.Subtotal
                 });
             }
 
-            await _context.SaveChangesAsync();
+            // Guardar cambios en la base de datos
+            await SaveChangesInDatabase();
 
             return true;
         }
