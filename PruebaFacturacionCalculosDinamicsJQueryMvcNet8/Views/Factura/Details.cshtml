@@ -4,21 +4,46 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Invoice Details</h2>
+<h2>Detalles de la Factura</h2>
 
 <div>
-    <h4>Invoice Number: @Model</h4>
-    <h4>Date: @Model.FechaEmision.ToString("yyyy-MM-dd")</h4>
-    <h4>Customer: @Model.Cliente</h4>
+    <h4>Factura</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Número de Factura
+        </dt>
+        <dd class="col-sm-10">
+            @Model.FacturaNumero
+        </dd>
+        <dt class="col-sm-2">
+            Fecha de Emisión
+        </dt>
+        <dd class="col-sm-10">
+            @Model.FechaEmision.ToString("dd/MM/yyyy")
+        </dd>
+        <dt class="col-sm-2">
+            Cliente
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Cliente.Firstname @Model.Cliente.Lastname
+        </dd>
+        <dt class="col-sm-2">
+            Total
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Total.ToString("C")
+        </dd>
+    </dl>
 </div>
 
-<h4>Items</h4>
+<h4>Productos</h4>
 <table class="table">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Quantity</th>
-            <th>Unit Price</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
             <th>Subtotal</th>
         </tr>
     </thead>
@@ -28,12 +53,13 @@
             <tr>
                 <td>@item.Product.Name</td>
                 <td>@item.Cantidad</td>
-                <td>@item.PrecioUnitario.ToString("F2")</td>
-                <td>@item.Subtotal.ToString("F2")</td>
+                <td>@item.PrecioUnitario.ToString("C")</td>
+                <td>@item.Subtotal.ToString("C")</td>
             </tr>
         }
     </tbody>
 </table>
 
 <h4>Total: @Model.Total.ToString("F2")</h4>
-<a asp-action="Index" class="btn btn-primary">Back to List</a>
+<a asp-action="Index" class="btn btn-primary">Volver a la lista</a>
+<a asp-action="Update" asp-route-id="@Model.Id" class="btn btn-warning">Actualizar Factura</a>

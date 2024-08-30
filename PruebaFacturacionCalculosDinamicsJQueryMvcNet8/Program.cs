@@ -49,3 +49,6 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8
         }
     }
 }
+
+// C:\Users\MARLO\source\repos\PruebaFacturacionCalculosDinamicsJQueryMvcNet8\PruebaFacturacionCalculosDinamicsJQueryMvcNet8
+// C:\Users\MARLO\source\repos\PruebaFacturacionCalculosDinamics\JQueryMvcNet8\PruebaFacturacionCalculosDinamics\JQueryMvcNet8\PruebaFacturacionCalculosDinamics\JQueryMvcNet8.csproj\Program.cs

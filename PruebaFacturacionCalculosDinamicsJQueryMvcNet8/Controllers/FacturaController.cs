@@ -30,7 +30,7 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index()
         {
-            return View(await _facturaService.GetFacturasAsync());
+            return View(await _facturaService.GetAllFacturasAsync());
         }
 
         /// <summary>
@@ -87,6 +87,89 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Controllers
             }
 
             return Json(new { success = true, product });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var factura = await _facturaService.GetFacturaByIdAsync(id);
+
+            if (factura == null)
+            {
+                return NotFound();
+            }
+
+            return View(factura);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Update(int id)
+        {
+            var factura = await _facturaService.GetFacturaByIdAsync(id);
+
+            if (factura is null)
+            {
+                return NotFound();
+            }
+
+            // Obtener productos disponibles para la edición
+            ViewBag.ProductosDisponibles = new SelectList(await _productoService.GetProductsAsync(), "Id", "Name");
+
+
+            // Podrías necesitar cargar alguna lista adicional, como productos disponibles
+            return View(factura);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Update(Factura factura)
+        {
+            if (ModelState.IsValid)
+            {
+                var facturaExistente = await _facturaService.GetFacturaByIdAsync(factura.Id);
+
+                if (facturaExistente == null)
+                {
+                    return NotFound();
+                }
+
+                // Actualiza los detalles de la factura
+                facturaExistente.FechaEmision = factura.FechaEmision;
+
+                // Limpiar y actualizar los productos asociados a la factura
+                facturaExistente.OrdenProductos.Clear();
+
+                foreach (var item in factura.OrdenProductos)
+                {
+                    facturaExistente.OrdenProductos.Add(new OrdenProductoViewModel
+                    {
+                        ProductId = item.ProductId,
+                        PrecioUnitario = item.PrecioUnitario,
+                        Cantidad = item.Cantidad,
+                        Subtotal = item.Subtotal
+                    });
+                }
+
+                // Recalcular el total
+                facturaExistente.Total = facturaExistente.OrdenProductos.Sum(x => x.Subtotal);
+
+                var facturaUpdated = new Factura
+                {
+                    Id = facturaExistente.Id,
+                    ClienteId = facturaExistente.ClienteId,
+                    FacturaNumero = facturaExistente.FacturaNumero,
+                    FechaEmision = facturaExistente.FechaEmision,
+                    Total = facturaExistente.Total
+                };
+
+                // Guarda los cambios
+                await _facturaService.UpdateFacturaAsync(facturaUpdated);
+
+                return RedirectToAction("Index");
+            }
+
+            // Si el modelo no es válido, recargar la lista de productos
+            ViewBag.ProductosDisponibles = new SelectList(await _productoService.GetProductsAsync(), "Id", "Nombre");
+            return View(factura);
         }
     }
 }

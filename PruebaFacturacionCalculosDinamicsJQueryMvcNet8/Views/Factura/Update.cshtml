@@ -1,0 +1,97 @@
+﻿@model PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Models.FacturaViewModel
+
+@{
+    ViewData["Title"] = "Update";
+}
+
+<h2>Actualizar Factura</h2>
+
+<form asp-action="Update" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div>
+        <label>Fecha Emisión</label>
+        @Html.TextBoxFor(m => m.FechaEmision, new { @class = "form-control", type = "date" })
+    </div>
+
+    <div>
+        <label>Cliente</label>
+        @Html.TextBoxFor(m => m.ClienteId, new { @class = "form-control", @readonly = "readonly" }) <!-- Se mantiene el cliente, pero como solo lectura -->
+    </div>
+
+    <h4>Productos</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Precio Unitario</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var producto in Model.OrdenProductos)
+            {
+                <tr>
+                    <td>
+                        @Html.DropDownListFor(m => producto.ProductId, (SelectList)ViewBag.ProductosDisponibles, "Seleccione un Producto", new { @class = "form-control" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => producto.PrecioUnitario, new { @class = "form-control", @readonly = "readonly" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => producto.Cantidad, new { @class = "form-control cantidad" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => producto.Subtotal, new { @class = "form-control subtotal", @readonly = "readonly" })
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger eliminarProducto">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div>
+        <label>Total</label>
+        @Html.TextBoxFor(m => m.Total, new { @class = "form-control", @readonly = "readonly" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function calcularSubtotal(precio, cantidad) {
+                return (precio * cantidad).toFixed(2);
+            }
+
+            function actualizarTotal() {
+                let total = 0;
+                $('.subtotal').each(function () {
+                    total += parseFloat($(this).val()) || 0;
+                });
+                $('#Total').val(total.toFixed(2));
+            }
+
+            $(document).on('input', '.cantidad', function () {
+                const fila = $(this).closest('tr');
+                const precioUnitario = parseFloat(fila.find('.form-control[readonly="readonly"]').val()) || 0;
+                const cantidad = parseFloat($(this).val()) || 0;
+                const subtotal = calcularSubtotal(precioUnitario, cantidad);
+                fila.find('.subtotal').val(subtotal);
+                actualizarTotal();
+            });
+
+            $(document).on('click', '.eliminarProducto', function () {
+                $(this).closest('tr').remove();
+                actualizarTotal();
+            });
+        });
+    </script>
+}
+
+
