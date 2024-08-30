@@ -109,30 +109,48 @@ namespace PruebaFacturacionCalculosDinamicsJQueryMvcNet8.Services
         public async Task<bool> UpdateFacturaAsync(Factura factura)
         {
             var facturaExistente = await _context.Facturas
-        .Include(f => f.OrdenProductos)
-        .FirstOrDefaultAsync(f => f.Id == factura.Id);
+                .Include(f => f.OrdenProductos)
+                .FirstOrDefaultAsync(f => f.Id == factura.Id);
 
             if (facturaExistente == null)
             {
-                return false;
+                return false; // Si la factura no existe, retornamos falso
             }
 
             // Actualizar las propiedades de la factura
             facturaExistente.FechaEmision = factura.FechaEmision;
             facturaExistente.Total = factura.Total;
 
-            // Eliminar productos actuales y agregar los nuevos
-            _context.OrdenProductos.RemoveRange(facturaExistente.OrdenProductos);
-
-            foreach (var producto in factura.OrdenProductos)
+            // Recorrer los productos existentes en la factura
+            foreach (var productoExistente in facturaExistente.OrdenProductos)
             {
-                facturaExistente.OrdenProductos.Add(new OrdenProducto
+                // Buscar si el producto existe en la nueva lista de productos de la factura
+                var productoActualizado = factura.OrdenProductos.FirstOrDefault(p => p.ProductId == productoExistente.ProductId);
+
+                if (productoActualizado != null)
                 {
-                    ProductId = producto.ProductId,
-                    Cantidad = producto.Cantidad,
-                    PrecioUnitario = producto.PrecioUnitario,
-                    Subtotal = producto.Subtotal
-                });
+                    // Si el producto existe, actualizamos sus propiedades
+                    productoExistente.Cantidad = productoActualizado.Cantidad;
+                    productoExistente.PrecioUnitario = productoActualizado.PrecioUnitario;
+                    productoExistente.Subtotal = productoActualizado.Subtotal;
+                }
+            }
+
+            // Añadir los nuevos productos que no estaban en la factura original
+            foreach (var productoNuevo in factura.OrdenProductos)
+            {
+                var productoExistente = facturaExistente.OrdenProductos.FirstOrDefault(p => p.ProductId == productoNuevo.ProductId);
+                if (productoExistente == null)
+                {
+                    // Si el producto no existe, lo añadimos a la factura
+                    facturaExistente.OrdenProductos.Add(new OrdenProducto
+                    {
+                        ProductId = productoNuevo.ProductId,
+                        Cantidad = productoNuevo.Cantidad,
+                        PrecioUnitario = productoNuevo.PrecioUnitario,
+                        Subtotal = productoNuevo.Subtotal
+                    });
+                }
             }
 
             // Guardar cambios en la base de datos
